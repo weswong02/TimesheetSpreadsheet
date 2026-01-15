@@ -1,0 +1,98 @@
+<div class="app-container">
+  <header class="app-header">
+    <h1>📋 Timesheet Parser</h1>
+    <p class="subtitle">Extract timesheet data from images and export to Excel</p>
+  </header>
+
+  <div class="container">
+    <!-- Error Message -->
+    <div class="error" *ngIf="errorMessage">
+      <strong>Error:</strong> {{ errorMessage }}
+      <button (click)="errorMessage = ''" class="close-btn">✕</button>
+    </div>
+
+    <!-- Success Message -->
+    <div class="success" *ngIf="successMessage">
+      <strong>Success:</strong> {{ successMessage }}
+      <button (click)="successMessage = ''" class="close-btn">✕</button>
+    </div>
+
+    <!-- Progress Indicator -->
+    <div class="progress-bar">
+      <div class="progress-step" [class.active]="currentStep === 'upload'" [class.completed]="currentStep !== 'upload'">
+        <div class="step-number">1</div>
+        <span>Upload</span>
+      </div>
+      <div class="progress-line" [class.active]="currentStep !== 'upload'"></div>
+      <div class="progress-step" [class.active]="currentStep === 'processing' || currentStep === 'review'" [class.completed]="currentStep === 'complete'">
+        <div class="step-number">2</div>
+        <span>Review</span>
+      </div>
+      <div class="progress-line" [class.active]="currentStep === 'complete'"></div>
+      <div class="progress-step" [class.active]="currentStep === 'complete'">
+        <div class="step-number">3</div>
+        <span>Complete</span>
+      </div>
+    </div>
+
+    <!-- Upload Step -->
+    <div *ngIf="currentStep === 'upload'">
+      <app-image-upload (imagesSelected)="onImagesSelected($event)"></app-image-upload>
+    </div>
+
+    <!-- Processing Step -->
+    <div *ngIf="currentStep === 'processing'" class="loading">
+      <div class="spinner"></div>
+      <p>Processing images with OCR... This may take a moment.</p>
+    </div>
+
+    <!-- Review Step -->
+    <div *ngIf="currentStep === 'review' && currentTimesheet">
+      <app-data-editor 
+        [data]="currentTimesheet"
+        (dataConfirmed)="onDataConfirmed($event)"
+        (dataCancelled)="onDataCancelled()">
+      </app-data-editor>
+    </div>
+
+    <!-- Complete Step -->
+    <div *ngIf="currentStep === 'complete'" class="complete-section">
+      <div class="complete-card">
+        <div class="icon-success">✓</div>
+        <h2>Timesheet Processed!</h2>
+        <p>You have successfully processed {{ allTimesheets.length }} timesheet(s).</p>
+
+        <div class="timesheets-list">
+          <h3>Processed Timesheets:</h3>
+          <ul>
+            <li *ngFor="let ts of allTimesheets; let i = index">
+              <strong>{{ i + 1 }}.</strong> {{ ts.name }} ({{ ts.payrollId }}) - {{ ts.entries.length }} entries
+            </li>
+          </ul>
+        </div>
+
+        <div class="action-group">
+          <button class="primary" (click)="addAnotherPerson()">
+            ➕ Add Another Person
+          </button>
+        </div>
+
+        <div class="export-section">
+          <h3>Export Options</h3>
+          <div class="export-buttons">
+            <button class="secondary" (click)="exportToExcel()">
+              📊 Export to Excel
+            </button>
+            <button class="secondary" (click)="exportToCSV()">
+              📄 Export to CSV
+            </button>
+          </div>
+        </div>
+
+        <button class="reset-btn" (click)="resetAll()">
+          🔄 Start Over (Clear All)
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

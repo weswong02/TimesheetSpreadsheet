@@ -1,0 +1,73 @@
+<div class="image-upload-container">
+  <h2>Upload Timesheet Images</h2>
+  <p class="instruction">Upload both the front and back images of the timesheet</p>
+  
+  <div class="upload-row">
+    <!-- Front Image Upload -->
+    <div class="upload-section">
+      <h3>Front Side</h3>
+      <div class="upload-area"
+           [class.drag-over]="dragOver"
+           (drop)="onDrop($event, 'front')"
+           (dragover)="onDragOver($event)"
+           (dragleave)="onDragLeave($event)">
+        
+        <div *ngIf="!frontImage" class="upload-prompt">
+          <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="17 8 12 3 7 8"></polyline>
+            <line x1="12" y1="3" x2="12" y2="15"></line>
+          </svg>
+          <p>Drop front image here or</p>
+          <label class="file-label">
+            <input type="file" 
+                   accept="image/*" 
+                   (change)="onFileSelected($event, 'front')">
+            <span class="file-button">Choose File</span>
+          </label>
+        </div>
+        
+        <div *ngIf="frontImage" class="image-preview">
+          <img [src]="frontImage" alt="Front timesheet">
+          <button class="remove-btn" (click)="frontImage = null">✕</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Back Image Upload -->
+    <div class="upload-section">
+      <h3>Back Side</h3>
+      <div class="upload-area"
+           [class.drag-over]="dragOver"
+           (drop)="onDrop($event, 'back')"
+           (dragover)="onDragOver($event)"
+           (dragleave)="onDragLeave($event)">
+        
+        <div *ngIf="!backImage" class="upload-prompt">
+          <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="17 8 12 3 7 8"></polyline>
+            <line x1="12" y1="3" x2="12" y2="15"></line>
+          </svg>
+          <p>Drop back image here or</p>
+          <label class="file-label">
+            <input type="file" 
+                   accept="image/*" 
+                   (change)="onFileSelected($event, 'back')">
+            <span class="file-button">Choose File</span>
+          </label>
+        </div>
+        
+        <div *ngIf="backImage" class="image-preview">
+          <img [src]="backImage" alt="Back timesheet">
+          <button class="remove-btn" (click)="backImage = null">✕</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="status-message" *ngIf="canProceed">
+    <span class="check-icon">✓</span>
+    Both images uploaded successfully! The system will now process them.
+  </div>
+</div>

@@ -1,0 +1,119 @@
+<div class="data-editor-container">
+  <h2>Review and Edit Timesheet Data</h2>
+  <p class="instruction">Please review the extracted data and make any necessary corrections</p>
+
+  <!-- Header Information -->
+  <div class="header-section">
+    <div class="form-grid">
+      <div class="form-field">
+        <label>Name</label>
+        <input type="text" [(ngModel)]="data.name" placeholder="Enter name">
+      </div>
+      
+      <div class="form-field">
+        <label>Payroll ID</label>
+        <input type="text" [(ngModel)]="data.payrollId" placeholder="Enter payroll ID">
+      </div>
+      
+      <div class="form-field">
+        <label>Department</label>
+        <input type="text" [(ngModel)]="data.department" placeholder="Enter department">
+      </div>
+      
+      <div class="form-field">
+        <label>Job</label>
+        <input type="text" [(ngModel)]="data.job" placeholder="Enter job">
+      </div>
+      
+      <div class="form-field full-width">
+        <label>Pay Period</label>
+        <input type="text" [(ngModel)]="data.payPeriod" placeholder="Enter pay period">
+      </div>
+    </div>
+  </div>
+
+  <!-- Time Entries Table -->
+  <div class="entries-section">
+    <div class="section-header">
+      <h3>Time Entries</h3>
+      <button class="add-btn" (click)="addEntry()">+ Add Entry</button>
+    </div>
+
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Day</th>
+            <th>IN</th>
+            <th>OUT</th>
+            <th>IN</th>
+            <th>OUT</th>
+            <th>IN</th>
+            <th>OUT</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let entry of data.entries; let i = index; trackBy: trackByIndex">
+            <td>
+              <input type="number" 
+                     [(ngModel)]="entry.day" 
+                     min="1" 
+                     max="31"
+                     class="day-input">
+            </td>
+            <td>
+              <input type="text" 
+                     [(ngModel)]="entry.inTime1" 
+                     placeholder="HH:MM"
+                     class="time-input">
+            </td>
+            <td>
+              <input type="text" 
+                     [(ngModel)]="entry.outTime1" 
+                     placeholder="HH:MM"
+                     class="time-input">
+            </td>
+            <td>
+              <input type="text" 
+                     [(ngModel)]="entry.inTime2" 
+                     placeholder="HH:MM"
+                     class="time-input">
+            </td>
+            <td>
+              <input type="text" 
+                     [(ngModel)]="entry.outTime2" 
+                     placeholder="HH:MM"
+                     class="time-input">
+            </td>
+            <td>
+              <input type="text" 
+                     [(ngModel)]="entry.inTime3" 
+                     placeholder="HH:MM"
+                     class="time-input">
+            </td>
+            <td>
+              <input type="text" 
+                     [(ngModel)]="entry.outTime3" 
+                     placeholder="HH:MM"
+                     class="time-input">
+            </td>
+            <td>
+              <button class="delete-btn" 
+                      (click)="removeEntry(i)"
+                      title="Remove entry">
+                🗑️
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Action Buttons -->
+  <div class="action-buttons">
+    <button class="secondary" (click)="cancel()">Cancel</button>
+    <button class="primary" (click)="confirmData()">Confirm & Continue</button>
+  </div>
+</div>
