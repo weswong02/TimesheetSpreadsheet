@@ -4,7 +4,8 @@ import { TimesheetData } from '../../models/timesheet.model';
 @Component({
   selector: 'app-data-editor',
   templateUrl: './data-editor.component.html',
-  styleUrls: ['./data-editor.component.scss']
+  styleUrls: ['./data-editor.component.scss'],
+  standalone: false
 })
 export class DataEditorComponent {
   @Input() data!: TimesheetData;
