@@ -6,6 +6,7 @@ export interface TimesheetEntry {
   outTime2: string;
   inTime3: string;
   outTime3: string;
+  confidence?: 'high' | 'medium' | 'low'; // OCR confidence level
 }
 
 export interface TimesheetData {
@@ -15,6 +16,8 @@ export interface TimesheetData {
   job: string;
   payPeriod: string;
   entries: TimesheetEntry[];
+  confidence?: 'high' | 'medium' | 'low'; // Overall extraction confidence
+  extractionNotes?: string; // Any issues or concerns during extraction
 }
 
 export interface PersonTimesheet {

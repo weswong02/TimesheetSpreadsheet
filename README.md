@@ -1,11 +1,11 @@
 # Timesheet Parser
 
-An Angular application that extracts timesheet data from images using OCR (Optical Character Recognition) and exports the data to Excel or CSV format.
+An Angular application that extracts timesheet data from images using Google Gemini AI and exports the data to Excel or CSV format.
 
 ## Features
 
 - 📸 **Image Upload**: Upload front and back images of physical timesheet cards
-- 🔍 **OCR Processing**: Automatically extract text data using Tesseract.js
+- 🤖 **AI Processing**: Automatically extract data using Google Gemini vision AI
 - ✏️ **Data Review & Editing**: Review and correct extracted data before finalizing
 - 👥 **Multi-Person Support**: Process timesheets for multiple people in one session
 - 📊 **Excel Export**: Export all processed timesheets to Excel format
@@ -85,7 +85,7 @@ src/
 ## Technologies Used
 
 - **Angular 17**: Frontend framework
-- **Tesseract.js**: OCR library for text extraction from images
+- **Google Gemini**: AI vision model for data extraction
 - **SheetJS (xlsx)**: Excel file generation
 - **TypeScript**: Type-safe JavaScript
 - **SCSS**: Styling
@@ -112,7 +112,6 @@ src/
 
 ## Future Enhancements
 
-- Cloud OCR integration (Google Vision, AWS Rekognition) for better accuracy
 - Batch processing of multiple people at once
 - Direct Google Sheets integration
 - Historical data storage

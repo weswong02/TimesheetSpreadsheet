@@ -2,6 +2,16 @@
   <h2>Review and Edit Timesheet Data</h2>
   <p class="instruction">Please review the extracted data and make any necessary corrections</p>
 
+  <!-- Confidence Warning -->
+  <div class="confidence-warning" *ngIf="data.confidence && data.confidence !== 'high'">
+    <div class="warning-header">
+      <span class="warning-icon">⚠️</span>
+      <strong>{{ data.confidence === 'medium' ? 'Medium' : 'Low' }} Confidence Extraction</strong>
+    </div>
+    <p *ngIf="data.extractionNotes" class="warning-message">{{ data.extractionNotes }}</p>
+    <p class="warning-tip">Please carefully review all fields below, especially time entries.</p>
+  </div>
+
   <!-- Header Information -->
   <div class="header-section">
     <div class="form-grid">
@@ -54,7 +64,9 @@
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let entry of data.entries; let i = index; trackBy: trackByIndex">
+          <tr *ngFor="let entry of data.entries; let i = index; trackBy: trackByIndex"
+              [class.low-confidence]="entry.confidence === 'low'"
+              [class.medium-confidence]="entry.confidence === 'medium'">
             <td>
               <input type="number" 
                      [(ngModel)]="entry.day" 

@@ -7,29 +7,42 @@ import { TimesheetData, TimesheetEntry } from '../models/timesheet.model';
 export class DataParsingService {
 
   parseTimesheetData(frontText: string, backText: string): TimesheetData {
-    const lines = (frontText + '\n' + backText).split('\n');
-    
-    // Initialize with default values
-    const data: TimesheetData = {
-      name: '',
-      payrollId: '',
-      department: '',
-      job: '',
-      payPeriod: '',
-      entries: []
-    };
+    try {
+      const lines = (frontText + '\n' + backText).split('\n').map(line => line.trim()).filter(line => line.length > 0);
+      
+      // Initialize with default values
+      const data: TimesheetData = {
+        name: '',
+        payrollId: '',
+        department: '',
+        job: '',
+        payPeriod: '',
+        entries: []
+      };
 
-    // Extract header information
-    data.name = this.extractField(lines, ['NAME', 'name']) || '';
-    data.payrollId = this.extractField(lines, ['PAYROLL ID', 'payroll']) || '';
-    data.department = this.extractField(lines, ['DEPARTMENT', 'dept']) || '';
-    data.job = this.extractField(lines, ['JOB', 'job']) || '';
-    data.payPeriod = this.extractField(lines, ['PAY PERIOD', 'period']) || '';
+      // Extract header information with multiple patterns
+      data.name = this.extractField(lines, ['NAME', 'name', 'employee', 'EMPLOYEE']) || 'Unknown';
+      data.payrollId = this.extractField(lines, ['PAYROLL ID', 'payroll', 'ID', 'employee id', 'EMP ID']) || '';
+      data.department = this.extractField(lines, ['DEPARTMENT', 'dept', 'DEPT']) || '';
+      data.job = this.extractField(lines, ['JOB', 'job', 'position', 'POSITION', 'title']) || '';
+      data.payPeriod = this.extractField(lines, ['PAY PERIOD', 'period', 'PERIOD', 'date range', 'DATE']) || '';
 
-    // Extract time entries
-    data.entries = this.extractTimeEntries(lines);
+      // Extract time entries with improved error handling
+      data.entries = this.extractTimeEntries(lines);
 
-    return data;
+      return data;
+    } catch (error) {
+      console.error('Error parsing timesheet:', error);
+      // Return minimal valid structure
+      return {
+        name: 'Parse Error',
+        payrollId: '',
+        department: '',
+        job: '',
+        payPeriod: '',
+        entries: []
+      };
+    }
   }
 
   private extractField(lines: string[], keywords: string[]): string {
@@ -37,16 +50,27 @@ export class DataParsingService {
       const lowerLine = line.toLowerCase();
       for (const keyword of keywords) {
         if (lowerLine.includes(keyword.toLowerCase())) {
-          // Extract value after keyword
-          const parts = line.split(/[:]/);
-          if (parts.length > 1) {
-            return parts[1].trim();
+          // Try multiple extraction patterns
+          
+          // Pattern 1: Colon separator (Name: John Doe)
+          const colonParts = line.split(/[:]/);  
+          if (colonParts.length > 1) {
+            const value = colonParts.slice(1).join(':').trim();
+            if (value) return value;
           }
-          // Try to find value on same line after keyword
-          const regex = new RegExp(keyword + '\\s*[:]?\\s*([^\\s]+)', 'i');
-          const match = line.match(regex);
-          if (match && match[1]) {
-            return match[1].trim();
+          
+          // Pattern 2: After keyword with optional colon (Name John Doe)
+          const afterKeyword = new RegExp(keyword + '\\s*:?\\s*(.+)', 'i');
+          const match1 = line.match(afterKeyword);
+          if (match1 && match1[1] && match1[1].trim()) {
+            return match1[1].trim();
+          }
+          
+          // Pattern 3: Value on next line or same line
+          const spacePattern = new RegExp(keyword + '\\s+([\\w\\s.-]+)', 'i');
+          const match2 = line.match(spacePattern);
+          if (match2 && match2[1]) {
+            return match2[1].trim();
           }
         }
       }
@@ -56,37 +80,59 @@ export class DataParsingService {
 
   private extractTimeEntries(lines: string[]): TimesheetEntry[] {
     const entries: TimesheetEntry[] = [];
+    // More flexible time pattern: matches 7:30, 730, 07:30, etc.
     const timePattern = /(\d{1,2})[:]?(\d{2})/g;
     
-    // Look for lines with day numbers and times
-    for (let i = 0; i < lines.length; i++) {
-      const line = lines[i];
-      
-      // Check if line starts with a day number (1-31)
-      const dayMatch = line.match(/^(\d{1,2})\s/);
-      if (dayMatch) {
-        const day = parseInt(dayMatch[1]);
-        if (day >= 1 && day <= 31) {
-          const times = [];
-          const matches = line.matchAll(timePattern);
-          
-          for (const match of matches) {
-            const hour = match[1].padStart(2, '0');
-            const minute = match[2];
-            times.push(`${hour}:${minute}`);
+    try {
+      // Look for lines with day numbers and times
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+        
+        // Multiple day matching patterns
+        // Pattern 1: Day at start ("1 8:00 17:00")
+        let dayMatch = line.match(/^(\d{1,2})[\s|\t]/);
+        // Pattern 2: Day with separator ("Day 1: 8:00")
+        if (!dayMatch) {
+          dayMatch = line.match(/day\s*(\d{1,2})/i);
+        }
+        // Pattern 3: Just a number followed by times
+        if (!dayMatch) {
+          dayMatch = line.match(/^(\d{1,2})(?=[:\s]\d)/);
+        }
+        
+        if (dayMatch) {
+          const day = parseInt(dayMatch[1]);
+          if (day >= 1 && day <= 31) {
+            const times: string[] = [];
+            const matches = Array.from(line.matchAll(timePattern));
+            
+            for (const match of matches) {
+              const hour = parseInt(match[1]);
+              const minute = match[2];
+              
+              // Validate time
+              if (hour >= 0 && hour <= 23 && parseInt(minute) >= 0 && parseInt(minute) <= 59) {
+                times.push(`${hour.toString().padStart(2, '0')}:${minute}`);
+              }
+            }
+            
+            // Only add entry if we found at least one valid time
+            if (times.length > 0) {
+              entries.push({
+                day: day,
+                inTime1: times[0] || '',
+                outTime1: times[1] || '',
+                inTime2: times[2] || '',
+                outTime2: times[3] || '',
+                inTime3: times[4] || '',
+                outTime3: times[5] || ''
+              });
+            }
           }
-          
-          entries.push({
-            day: day,
-            inTime1: times[0] || '',
-            outTime1: times[1] || '',
-            inTime2: times[2] || '',
-            outTime2: times[3] || '',
-            inTime3: times[4] || '',
-            outTime3: times[5] || ''
-          });
         }
       }
+    } catch (error) {
+      console.error('Error extracting time entries:', error);
     }
     
     return entries;

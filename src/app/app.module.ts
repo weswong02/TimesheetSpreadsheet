@@ -6,12 +6,14 @@ import { FormsModule } from '@angular/forms';
 import { AppComponent } from './app.component';
 import { ImageUploadComponent } from './components/image-upload/image-upload.component';
 import { DataEditorComponent } from './components/data-editor/data-editor.component';
+import { SettingsComponent } from './components/settings/settings.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     ImageUploadComponent,
-    DataEditorComponent
+    DataEditorComponent,
+    SettingsComponent
   ],
   imports: [
     BrowserModule,

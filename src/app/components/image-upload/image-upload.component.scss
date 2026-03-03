@@ -3,7 +3,48 @@
 
   .instruction {
     color: #666;
+    margin-bottom: 20px;
+  }
+
+  .mode-selector {
+    background: #f7fafc;
+    padding: 20px;
+    border-radius: 8px;
     margin-bottom: 30px;
+    display: flex;
+    gap: 30px;
+
+    @media (max-width: 768px) {
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .radio-option {
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+      font-size: 16px;
+
+      input[type="radio"] {
+        margin-right: 10px;
+        cursor: pointer;
+        width: 18px;
+        height: 18px;
+      }
+
+      span {
+        user-select: none;
+      }
+    }
+  }
+
+  .single-upload {
+    margin-bottom: 30px;
+
+    .full-width {
+      max-width: 600px;
+      margin: 0 auto;
+    }
   }
 
   .upload-row {
@@ -108,6 +149,10 @@
     }
   }
 
+  .action-area {
+    margin-top: 30px;
+  }
+
   .status-message {
     background: #c6f6d5;
     color: #2f855a;
@@ -116,6 +161,7 @@
     display: flex;
     align-items: center;
     gap: 10px;
+    margin-bottom: 20px;
 
     .check-icon {
       width: 24px;
@@ -127,6 +173,45 @@
       align-items: center;
       justify-content: center;
       font-weight: bold;
+    }
+  }
+
+  .button-group {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+
+    .btn {
+      padding: 12px 32px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+
+      &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      }
+
+      &.btn-primary {
+        background: #667eea;
+        color: white;
+
+        &:hover {
+          background: #5568d3;
+        }
+      }
+
+      &.btn-secondary {
+        background: #e2e8f0;
+        color: #4a5568;
+
+        &:hover {
+          background: #cbd5e0;
+        }
+      }
     }
   }
 }

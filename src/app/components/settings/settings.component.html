@@ -1,0 +1,68 @@
+<div class="settings-container">
+  <h2>⚙️ Settings</h2>
+
+  <!-- Gemini Configuration -->
+  <div class="settings-section">
+    <h3>Google Gemini API Configuration</h3>
+    <p class="description">
+      Enter your Gemini API key to use <strong>{{ providerInfo.name }}</strong> for handwriting recognition.
+    </p>
+
+    <div class="provider-info">
+      <div class="info-badge" [class.configured]="isConfigured()">
+        {{ isConfigured() ? '✓ Configured' : '⚠ Not Configured' }}
+      </div>
+      <p>{{ providerInfo.description }}</p>
+    </div>
+
+    <div class="form-group">
+      <label for="geminiApiKey">API Key:</label>
+      <div class="input-with-button">
+        <input
+          id="geminiApiKey"
+          [type]="showApiKey ? 'text' : 'password'"
+          [(ngModel)]="geminiApiKey"
+          placeholder="AIza..."
+          class="api-key-input"
+        />
+        <button class="toggle-btn" (click)="toggleShowKey()" type="button">
+          {{ showApiKey ? '🙈' : '👁️' }}
+        </button>
+      </div>
+    </div>
+
+    <div class="button-group">
+      <button class="btn btn-primary" (click)="saveSettings()" [disabled]="!geminiApiKey.trim()">
+        Save Settings
+      </button>
+      <button class="btn btn-secondary" (click)="clearSettings()">
+        Clear
+      </button>
+    </div>
+
+    <div class="info-box">
+      <h4>ℹ️ How to get a Gemini API key:</h4>
+      <ol>
+        <li>Visit <a [href]="providerInfo.setupUrl" target="_blank">Google AI Studio</a></li>
+        <li>Sign in with your Google account</li>
+        <li>Click "Get API key" → "Create API key"</li>
+        <li>Copy and paste it here</li>
+      </ol>
+      <p><strong>Free Tier:</strong> Generous free quota available for Gemini 1.5 Flash!</p>
+    </div>
+  </div>
+
+  <!-- Success Message -->
+  <div class="success-message" *ngIf="savedMessage">
+    ✓ {{ savedMessage }}
+  </div>
+
+  <!-- Security Note -->
+  <div class="info-box security-note">
+    <h4>🔒 Security & Privacy</h4>
+    <p>
+      Your API key is stored locally in your browser's localStorage and <strong>never</strong> sent to any server
+      other than the Google Gemini API. All processing happens directly between your browser and Google.
+    </p>
+  </div>
+</div>
