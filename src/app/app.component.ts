@@ -17,6 +17,7 @@ export class AppComponent implements OnInit, AfterViewInit {
 
   currentStep: 'upload' | 'processing' | 'review' | 'complete' = 'upload';
   allTimesheets: TimesheetData[] = [];
+  hourlyRate: number = 21;
   currentTimesheet: TimesheetData | null = null;
   isProcessing = false;
   errorMessage = '';
@@ -158,7 +159,7 @@ export class AppComponent implements OnInit, AfterViewInit {
   exportToExcel(): void {
     if (this.allTimesheets.length === 0) { this.errorMessage = 'No timesheets to export'; return; }
     try {
-      this.excelService.exportToExcel(this.allTimesheets);
+      this.excelService.exportToExcel(this.allTimesheets, 'timesheets', this.hourlyRate);
       this.successMessage = 'Excel file downloaded successfully!';
     } catch (error) {
       console.error('Error exporting to Excel:', error);
@@ -169,7 +170,7 @@ export class AppComponent implements OnInit, AfterViewInit {
   exportToCSV(): void {
     if (this.allTimesheets.length === 0) { this.errorMessage = 'No timesheets to export'; return; }
     try {
-      this.excelService.exportToCSV(this.allTimesheets);
+      this.excelService.exportToCSV(this.allTimesheets, 'timesheets', this.hourlyRate);
       this.successMessage = 'CSV file downloaded successfully!';
     } catch (error) {
       console.error('Error exporting to CSV:', error);

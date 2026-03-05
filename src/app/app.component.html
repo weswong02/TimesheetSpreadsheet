@@ -118,6 +118,7 @@
       <div *ngIf="currentStep === 'review' && currentTimesheet">
         <app-data-editor
           [data]="currentTimesheet"
+          [(hourlyRate)]="hourlyRate"
           (dataConfirmed)="onDataConfirmed($event)"
           (dataCancelled)="onDataCancelled()">
         </app-data-editor>

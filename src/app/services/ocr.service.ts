@@ -273,7 +273,7 @@ SECOND IMAGE: Extract days 16-31`;
 
       const requestBody = {
         contents: [{ role: 'user', parts: userParts }],
-        generationConfig: { temperature: 0.2, maxOutputTokens: 8192 }
+        generationConfig: { temperature: 0.2, maxOutputTokens: 16384 }
       };
 
       const url = `${this.geminiApiUrl}/${this.geminiModel}:generateContent`;
@@ -301,7 +301,22 @@ SECOND IMAGE: Extract days 16-31`;
         jsonText = jsonText.replace(/```json\n?|```\n?/g, '').trim();
       }
 
-      const parsedData: TimesheetData = JSON.parse(jsonText);
+      // Attempt parse; if the response was truncated, try to recover
+      let parsedData: TimesheetData;
+      try {
+        parsedData = JSON.parse(jsonText);
+      } catch (parseErr: any) {
+        const repaired = this.repairTruncatedJson(jsonText);
+        if (repaired) {
+          parsedData = repaired;
+          if (!parsedData.extractionNotes) {
+            parsedData.extractionNotes = 'Response was truncated — some entries near the end may be missing.';
+          }
+          parsedData.confidence = parsedData.confidence === 'high' ? 'medium' : parsedData.confidence ?? 'low';
+        } else {
+          throw parseErr; // nothing salvageable, re-throw original error
+        }
+      }
 
       // Validate structure
       if (!parsedData.entries) {
@@ -312,6 +327,66 @@ SECOND IMAGE: Extract days 16-31`;
     } catch (error: any) {
       console.error('Gemini parsing error:', error);
       throw new Error(`Failed to parse timesheet with Gemini: ${error.message}`);
+    }
+  }
+
+  /**
+   * Attempt to recover a TimesheetData object from a JSON string that was cut off
+   * mid-stream (e.g. "Unterminated string" errors from LLM token limits).
+   *
+   * Strategy:
+   *  1. Collect all complete entry objects already present using a greedy regex.
+   *  2. Scrape top-level scalar fields (name, payrollId, etc.) with simple regexes.
+   *  3. Return a valid TimesheetData with whatever was recoverable, or null if
+   *     nothing useful was found at all.
+   */
+  private repairTruncatedJson(raw: string): TimesheetData | null {
+    try {
+      // ── 1. Extract all complete entry objects ───────────────────────────
+      const entries: any[] = [];
+      // Match each {...} block inside "entries": [ ... ] — greedy but bounded
+      const entryRegex = /\{[^{}]*"day"\s*:\s*\d+[^{}]*\}/g;
+      let m: RegExpExecArray | null;
+      while ((m = entryRegex.exec(raw)) !== null) {
+        try {
+          const entry = JSON.parse(m[0]);
+          if (typeof entry.day === 'number') {
+            entries.push(entry);
+          }
+        } catch {
+          // malformed fragment — skip
+        }
+      }
+
+      // ── 2. Extract top-level scalar fields ──────────────────────────────
+      const extractStr = (field: string): string => {
+        const r = new RegExp(`"${field}"\\s*:\\s*"([^"]*)"`, 'i');
+        return raw.match(r)?.[1] ?? '';
+      };
+
+      const name         = extractStr('name');
+      const payrollId    = extractStr('payrollId');
+      const department   = extractStr('department');
+      const job          = extractStr('job');
+      const payPeriod    = extractStr('payPeriod');
+      const rawConf      = extractStr('confidence') as any;
+      const extractionNotes = extractStr('extractionNotes');
+
+      // Accept result only if we got at least a name OR some entries
+      if (!name && entries.length === 0) return null;
+
+      return {
+        name:             name       || 'Unknown',
+        payrollId:        payrollId  || '',
+        department:       department || '',
+        job:              job        || '',
+        payPeriod:        payPeriod  || '',
+        confidence:       ['high', 'medium', 'low'].includes(rawConf) ? rawConf : 'low',
+        extractionNotes:  extractionNotes || '',
+        entries
+      };
+    } catch {
+      return null;
     }
   }
 

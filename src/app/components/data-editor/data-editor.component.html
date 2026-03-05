@@ -46,6 +46,20 @@
   <div class="entries-section">
     <div class="section-header">
       <h3>Time Entries</h3>
+      <div class="rate-field">
+        <label for="hourlyRate">Hourly Rate</label>
+        <div class="rate-input-wrapper">
+          <span class="rate-prefix">$</span>
+          <input id="hourlyRate"
+                 type="number"
+                 [ngModel]="hourlyRate"
+                 (ngModelChange)="onRateChange($event)"
+                 min="0"
+                 step="0.01"
+                 class="rate-input">
+          <span class="rate-suffix">/hr</span>
+        </div>
+      </div>
       <button class="add-btn" (click)="addEntry()">+ Add Entry</button>
     </div>
 
@@ -60,6 +74,8 @@
             <th>OUT</th>
             <th>IN</th>
             <th>OUT</th>
+            <th>Hours</th>
+            <th>Pay (&#64;${{ hourlyRate }}/hr)</th>
             <th></th>
           </tr>
         </thead>
@@ -110,6 +126,14 @@
                      placeholder="HH:MM"
                      class="time-input">
             </td>
+            <td class="calc-cell">
+              <div class="hours-total">{{ formatHours(calcDayHours(entry)) }}h</div>
+              <div class="hours-breakdown">{{ calcDayBreakdown(entry) }}</div>
+            </td>
+            <td class="calc-cell">
+              <div class="pay-amount">{{ formatCurrency(calcDayPay(entry)) }}</div>
+              <div class="pay-formula">{{ formatHours(calcDayHours(entry)) }}h × ${{ hourlyRate }}</div>
+            </td>
             <td>
               <button class="delete-btn" 
                       (click)="removeEntry(i)"
@@ -119,6 +143,19 @@
             </td>
           </tr>
         </tbody>
+        <tfoot>
+          <tr class="totals-row">
+            <td colspan="7" class="totals-label">TOTALS</td>
+            <td class="calc-cell totals-value">
+              <strong>{{ formatHours(calcTotalHours()) }}h</strong>
+            </td>
+            <td class="calc-cell totals-value">
+              <strong>{{ formatCurrency(calcTotalPay()) }}</strong>
+              <div class="pay-formula">{{ formatHours(calcTotalHours()) }}h × ${{ hourlyRate }}</div>
+            </td>
+            <td></td>
+          </tr>
+        </tfoot>
       </table>
     </div>
   </div>
