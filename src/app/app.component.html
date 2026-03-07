@@ -48,6 +48,16 @@
           <span class="user-name">{{ userProfile.name }}</span>
         </div>
 
+        <!-- Save / Load — only for Google-authenticated users -->
+        <ng-container *ngIf="isGoogleUser">
+          <button class="header-btn load-btn"
+                  (click)="loadSavedTimesheets()"
+                  [disabled]="isLoadingSaved"
+                  title="Load previously saved timesheets">
+            {{ isLoadingSaved ? 'Loading…' : '📂 My Saved' }}
+          </button>
+        </ng-container>
+
         <button class="settings-btn" (click)="toggleSettings()" [class.active]="showSettings">
           ⚙ Settings
         </button>
@@ -158,6 +168,17 @@
             </div>
           </div>
 
+          <!-- Save to account — only shown when signed in with Google -->
+          <div class="save-section" *ngIf="isGoogleUser">
+            <h3>Save</h3>
+            <p class="save-description">Save your processed timesheets to your account to access them next time you log in.</p>
+            <button class="btn-save"
+                    (click)="saveCurrentTimesheets()"
+                    [disabled]="isSaving">
+              {{ isSaving ? 'Saving…' : '💾 Save to My Account' }}
+            </button>
+          </div>
+
           <button class="reset-btn" (click)="resetAll()">
             Start Over — Clear All
           </button>
@@ -166,5 +187,44 @@
 
     </div><!-- end main app view -->
   </div>
+
+  <!-- ══════════════════════════════════════════════════════════ -->
+  <!--  SAVED TIMESHEETS PANEL                                   -->
+  <!-- ══════════════════════════════════════════════════════════ -->
+  <div class="saved-overlay" *ngIf="showSavedPanel" (click)="closeSavedPanel()">
+    <div class="saved-panel" (click)="$event.stopPropagation()">
+
+      <div class="saved-panel-header">
+        <h2>Your Saved Timesheets</h2>
+        <button class="close-btn" (click)="closeSavedPanel()">✕</button>
+      </div>
+
+      <div *ngIf="isLoadingSaved" class="saved-loading">
+        <div class="spinner"></div>
+        <p>Loading your timesheets…</p>
+      </div>
+
+      <div *ngIf="!isLoadingSaved && savedTimesheets.length === 0" class="saved-empty">
+        No saved timesheets found.
+      </div>
+
+      <ul class="saved-list" *ngIf="!isLoadingSaved && savedTimesheets.length > 0">
+        <li *ngFor="let ts of savedTimesheets" class="saved-item">
+          <div class="saved-info">
+            <span class="saved-name">{{ ts.name }}</span>
+            <span class="saved-meta">{{ ts.department }} · {{ ts.payPeriod }}</span>
+            <span class="saved-totals">{{ ts.totalHours }}h · ${{ ts.totalPay | number:'1.2-2' }} (&#64;${{ ts.hourlyRate }}/hr)</span>
+            <span class="saved-date">Saved {{ ts.savedAt | date:'medium' }}</span>
+          </div>
+          <div class="saved-actions">
+            <button class="btn-restore" (click)="restoreTimesheet(ts)">Restore</button>
+            <button class="btn-delete" (click)="deleteSavedTimesheet(ts.id)">Delete</button>
+          </div>
+        </li>
+      </ul>
+
+    </div>
+  </div>
+
 </div>
 
