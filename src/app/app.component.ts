@@ -39,6 +39,7 @@ export class AppComponent implements OnInit, AfterViewInit {
   isSaving = false;
   isLoadingSaved = false;
   showSavedPanel = false;
+  showProfileDropdown = false;
 
   constructor(
     private ocrService: OcrService,
@@ -151,6 +152,7 @@ export class AppComponent implements OnInit, AfterViewInit {
     this.isSignedIn = false;
     this.savedTimesheets = [];
     this.showSavedPanel = false;
+    this.showProfileDropdown = false;
     sessionStorage.removeItem('user_profile');
     sessionStorage.removeItem('user_id');
     sessionStorage.removeItem('google_credential');
@@ -162,6 +164,7 @@ export class AppComponent implements OnInit, AfterViewInit {
     this.isSignedIn = false;
     this.userProfile = null;
     this.userId = null;
+    this.showProfileDropdown = false;
     this.firestoreService.signOut().catch(() => {});
     sessionStorage.removeItem('user_profile');
     sessionStorage.removeItem('user_id');
@@ -240,6 +243,14 @@ export class AppComponent implements OnInit, AfterViewInit {
     this.showSavedPanel = false;
   }
 
+  toggleProfileDropdown(): void {
+    this.showProfileDropdown = !this.showProfileDropdown;
+  }
+
+  closeProfileDropdown(): void {
+    this.showProfileDropdown = false;
+  }
+
   // ── Timesheet workflow ──
 
   async onImagesConfirmed(images: { front: string; back: string }): Promise<void> {
@@ -301,6 +312,7 @@ export class AppComponent implements OnInit, AfterViewInit {
 
   toggleSettings(): void {
     this.showSettings = !this.showSettings;
+    this.showProfileDropdown = false;
   }
 
   resetAll(): void {
