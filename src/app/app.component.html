@@ -52,8 +52,8 @@
           ⚙ Settings
         </button>
 
-        <button class="signout-btn" (click)="signOut()" title="Sign out">
-          Sign out
+        <button class="signout-btn" (click)="userProfile ? signOut() : signInWithGoogle()" [title]="userProfile ? 'Sign out' : 'Sign in with Google'">
+          {{ userProfile ? 'Sign out' : 'Sign in' }}
         </button>
       </div>
     </div>

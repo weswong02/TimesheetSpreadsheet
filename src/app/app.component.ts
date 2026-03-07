@@ -73,24 +73,29 @@ export class AppComponent implements OnInit, AfterViewInit {
         // then defer renderButton one tick so the element actually exists.
         this.ngZone.run(() => {
           this.googleAvailable = true;
-          setTimeout(() => {
-            const btn = document.getElementById('google-signin-btn');
-            if (btn) {
-              google.accounts.id.renderButton(btn, {
-                theme: 'filled_black',
-                size: 'large',
-                text: 'continue_with',
-                shape: 'rectangular',
-                width: 300
-              });
-            }
-          }, 0);
+          setTimeout(() => this.renderGoogleButton(), 0);
         });
       } else {
         setTimeout(tryInit, 500);
       }
     };
     tryInit();
+  }
+
+  renderGoogleButton(): void {
+    if (typeof google !== 'undefined' && this.googleAvailable) {
+      const btn = document.getElementById('google-signin-btn');
+      if (btn) {
+        btn.innerHTML = ''; // clear any stale content
+        google.accounts.id.renderButton(btn, {
+          theme: 'filled_black',
+          size: 'large',
+          text: 'continue_with',
+          shape: 'rectangular',
+          width: 300
+        });
+      }
+    }
   }
 
   handleGoogleCredential(response: any): void {
@@ -117,6 +122,22 @@ export class AppComponent implements OnInit, AfterViewInit {
     this.userProfile = null;
     this.isSignedIn = false;
     sessionStorage.removeItem('user_profile');
+    setTimeout(() => this.renderGoogleButton(), 0);
+  }
+
+  signInWithGoogle(): void {
+    // Go back to login screen so the Google SSO button is visible
+    this.isSignedIn = false;
+    this.userProfile = null;
+    sessionStorage.removeItem('user_profile');
+
+    // Re-render the button and prompt One Tap after Angular re-renders the login screen
+    setTimeout(() => {
+      this.renderGoogleButton();
+      if (typeof google !== 'undefined' && this.googleAvailable) {
+        google.accounts.id.prompt();
+      }
+    }, 100);
   }
 
   // ── Timesheet workflow ──
